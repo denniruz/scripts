@@ -1,0 +1,10 @@
+<tree>
+	<child name="my_child1" xsl:type="goog">
+		<name>Google</name>
+		<age>
+			34 years
+
+		</age>
+	</child>
+
+</tree>

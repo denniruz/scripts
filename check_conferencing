@@ -1,0 +1,87 @@
+#!/usr/bin/perl
+#
+# Copyright (c) 2006 Vocalocity
+# Date: 12/13/2006
+# check_conferencing
+#
+# This script fetches the statistics on a conferencing server and presents them to nagios
+# in a format it can use.
+#
+# USE:
+# check_conferencing STATS_URL
+#
+# Pre-requisites
+# XML::Simple   - perl-XML-Simple
+# LibWWW        - perl-libwww-perl
+# Data::Dumper (for debug)
+#
+
+#use strict;
+#use warnings;
+no warnings;
+use XML::Simple;
+use LWP::Simple qw/get/;
+use Data::Dumper;
+
+# Where do we fetch stats from?
+my $stats_url = $ARGV[0];
+if(!$stats_url) {
+  print "Please provide a stats url as the first url\n";
+  exit 3;
+}
+
+my $xml_text = get($stats_url);
+
+if(!$xml_text) {
+  print "Could not fetch stats url $stats_url\n";
+  exit 3;
+}
+
+my $xml = XMLin($xml_text);
+
+if(ref($xml) ne 'HASH') {
+  print "Did not get a hash reference from parsing the xml:\n";
+  print "Xml text: $xml_text\n";
+  print "Xml result\n";
+  print Dumper($xml);
+  exit 3;
+}
+
+# For debugging
+#print Dumper($xml);
+
+# the following defines the order and the content of the stats reported
+my @stat_list = (
+  "sessions" => $xml->{'category'}{'ccxmlmanager'}{'data'}{'ccxml.current.sessions'}{'content'},
+  "conferences" => $xml->{'category'}{'ccxmlmanager'}{'data'}{'ccxml.conferences.active'}{'content'},
+  "calls" => $xml->{'category'}{'ccxmlmanager'}{'data'}{'ccxml.current.calls'}{'content'},
+);
+
+# add in the various 
+push @stat_list, split_metrics("first_audio", $xml->{'category'}{'Metric Stats'}{'data'}{'vocalos.telephony.time_to_first_audio.metric'}{'content'});
+push @stat_list, split_metrics("time_to_answer", $xml->{'category'}{'Metric Stats'}{'data'}{'vocalos.telephony.time_to_answer.metric'}{'content'});
+
+print join(" ", @stat_list), "\n";
+
+exit 0;
+
+
+sub split_metrics {
+  my($label, $raw) = @_;
+
+  $label .= '.' if $label;
+  my @sublabels = ('min','max','avg','total','count','last');
+
+  my @stat = split(",", $raw);
+  
+  my @result;
+  while(@sublabels) {
+    push @result, ($label . shift @sublabels), (shift @stat);
+  }
+  
+  return @result;
+}
+
+
+
+

@@ -1,0 +1,26 @@
+#!/bin/bash
+IF1_HWADDR=$(/sbin/ifconfig $1 |/bin/awk '/HWaddr/ {print $NF}')
+IF2_HWADDR=$(/sbin/ifconfig $2 |/bin/awk '/HWaddr/ {print $NF}')
+echo "DEVICE=bond0" > /etc/sysconfig/network-scripts/ifcfg-bond0
+echo "BOOTPROTO=none" >> /etc/sysconfig/network-scripts/ifcfg-bond0
+echo "ONBOOT=yes" >> /etc/sysconfig/network-scripts/ifcfg-bond0
+echo "NETMASK=255.255.0.0" >> /etc/sysconfig/network-scripts/ifcfg-bond0
+echo "IPADDR=$3" >> /etc/sysconfig/network-scripts/ifcfg-bond0
+echo "USERCTL=no" >> /etc/sysconfig/network-scripts/ifcfg-bond0
+echo "BONDING_OPTS=mode=1 miimon=100" >> /etc/sysconfig/network-scripts/ifcfg-bond0
+echo "DEVICE=$1" > /etc/sysconfig/network-scripts/ifcfg-$1
+echo "BOOTPROTO=none" >> /etc/sysconfig/network-scripts/ifcfg-$1
+echo "ONBOOT=yes" >> /etc/sysconfig/network-scripts/ifcfg-$1
+echo "MASTER=bond0" >> /etc/sysconfig/network-scripts/ifcfg-$1
+echo "SLAVE=yes" >> /etc/sysconfig/network-scripts/ifcfg-$1
+echo "USERCTL=no" >> /etc/sysconfig/network-scripts/ifcfg-$1
+echo "HWADDR=${IF1_HWADDR}" >> /etc/sysconfig/network-scripts/ifcfg-$1
+echo "DEVICE=$2" > /etc/sysconfig/network-scripts/ifcfg-$2
+echo "BOOTPROTO=none" >> /etc/sysconfig/network-scripts/ifcfg-$2
+echo "ONBOOT=yes" >> /etc/sysconfig/network-scripts/ifcfg-$2
+echo "MASTER=bond0" >> /etc/sysconfig/network-scripts/ifcfg-$2
+echo "SLAVE=yes" >> /etc/sysconfig/network-scripts/ifcfg-$2
+echo "USERCTL=no" >> /etc/sysconfig/network-scripts/ifcfg-$2
+echo "HWADDR=${IF2_HWADDR}" >> /etc/sysconfig/network-scripts/ifcfg-$2
+echo "alias bond0 bonding" >> /etc/modprobe.conf
+

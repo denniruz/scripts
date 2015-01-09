@@ -1,0 +1,37 @@
+#!/bin/bash
+
+_usage() 
+	{
+	echo "Usage: $(basename $0) <warn_value> <crit_value> <VIP>"
+	echo "Where VIP is 200 for the production instance and 201 is for" 
+	echo "the reporting instance"
+	}
+
+W=${1}
+C=${2}
+OPTERROR=85
+if [[ "${3}" == "200" ]] ; then 
+	_NETSTAT=$(/bin/netstat -atn |grep -c 200:6543)
+elif [[ "${3}" == "201" ]] ; then
+	_NETSTAT=$(/bin/netstat -atn |grep -c 201:6543)
+else
+  _usage
+fi
+ 
+num='pgsqlconnections='${_NETSTAT}';'${W}';'${C}';0;5000'
+if [[ ! $# -eq 3 ]] ; then 
+	_usage
+	exit ${OPTERROR}
+fi
+
+if [[ ${_NETSTAT} -lt ${W} ]] ; then
+	echo "OK: | ${num}"
+  exit 0
+elif [[ ${_NETSTAT} -gt ${W} ]] && [[ ${_NETSTAT} -lt ${C} ]] ; then
+	echo "WARNING: | ${num}"
+  exit 1
+else 
+	echo "CRITICAL: | ${num}"
+  exit 2
+fi
+

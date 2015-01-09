@@ -1,0 +1,9 @@
+# Open file descriptor 3 for read/write operations
+exec 3<>/dev/tcp/www.google.com/80
+# Send the request to the FD
+echo -e "GET / HTTP/1.1\r\nhost: http://www.google.com\r\nConnection: close\r\n\r\n" >&3
+# Get the data from the FD
+cat <&3
+# Close the FD otherwise you'll leave CLOSE_WAIT sockets open.
+exec 3>&-
+

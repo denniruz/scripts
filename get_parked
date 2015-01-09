@@ -1,0 +1,4 @@
+#!/bin/bash
+. /home/druzeski/scripts/vos_functions
+get_calls $1 |grep sip: |grep "*103"
+

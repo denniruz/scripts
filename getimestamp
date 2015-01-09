@@ -1,0 +1,4 @@
+#!/bin/bash
+# return time stamp of a file in YYYYMMDDHHMMSS format
+
+stat -c %y $1|sed -e 's/-//g' -e 's/://g' -e 's/ //g'|cut -c1-14

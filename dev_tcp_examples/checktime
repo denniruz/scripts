@@ -1,0 +1,4 @@
+# Very simple example-- Queries the port, sends return to STDOUT
+cat </dev/tcp/utcnist.colorado.edu/13
+
+

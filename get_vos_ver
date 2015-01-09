@@ -1,0 +1,5 @@
+#!/bin/bash
+exec 3<>/dev/tcp/localhost/8080
+echo -e "GET /vocalocity-browser/version.properties\n\n">&3
+cat <&3
+

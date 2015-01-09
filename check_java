@@ -1,0 +1,9 @@
+#!/bin/bash
+nc -z $host $port
+if [[ $? -eq 0 ]];then
+echo warning message
+else
+start jbossx
+fi
+
+

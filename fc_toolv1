@@ -1,0 +1,25 @@
+#!/bin/bash
+# Quick Check or set of failcounts on the controler failover.
+# druzeski - 11.28.2012
+#
+NO_ARGS=0 
+E_OPTERROR=85
+
+if [ $# -eq "$NO_ARGS" ]    # Script invoked with no command-line args?
+then
+  echo "Usage: `basename $0` <show | set (value)> <HOSTNAME>"
+  exit $E_OPTERROR         
+fi
+
+case $1 in 
+show)
+	ssh $2 "crm resource failcount OpenSIPS_resource show $2.atldc.vocalocity.com"
+	;;
+set)
+	ssh $3 "crm resource failcount OpenSIPS_resource set $3.atldc.vocalocity.com $2"
+	;;
+*)
+	echo "Usage: `basename $0` <show | set (value)> <HOSTNAME>"
+	;;
+esac
+

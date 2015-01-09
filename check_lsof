@@ -1,0 +1,45 @@
+#!/bin/bash
+W=${1}
+C=${2}
+OPTERROR=85
+if [[ $# -eq 2 ]] ; then
+	__USER="jboss"
+else 
+	__USER=${3}
+fi
+LSOF=$(/usr/sbin/lsof -u ${__USER} | /usr/bin/wc -l)
+num='numberofopenfiles='${LSOF}';'${W}';'${C}';0;5000'
+
+_usage() 
+	{
+	echo "Usage: $(basename $0) <warn_value> <crit_value> [OPTIONAL]<user>"
+	echo "If no valid username is specified, jboss is used."
+	}
+
+if [[ $# -eq 3 ]] ; then
+	id ${3} > /dev/null 2>&1
+	if [[ $? -eq 1 ]] ;then
+		echo "Invalid User!"
+		exit 5
+	fi
+fi
+
+if [[ $# -gt 3 ]] || [[ $# -lt 2 ]] ; then 
+	_usage
+	exit ${OPTERROR}
+fi
+
+if [[ ${LSOF} -lt ${W} ]] ; then
+	echo "OK: | ${num}"
+  echo "Open files are ok."
+  exit 0
+elif [[ ${LSOF} -gt ${W} ]] && [[ ${LSOF} -lt ${C} ]] ; then
+	echo "WARNING: | ${num}"
+  echo "User ${__USER} has ${LSOF} open files!"
+  exit 1
+else 
+	echo "CRITICAL: | ${num}"
+  echo "User ${__USER} has ${LSOF} open files!"
+  exit 2
+fi
+

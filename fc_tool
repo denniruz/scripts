@@ -1,0 +1,39 @@
+#!/bin/bash
+# Quick Check or set of failcounts on the controler failover.
+# druzeski - 11.28.2012
+#
+NO_ARGS=0 
+E_OPTERROR=85
+
+if [ $# -eq "$NO_ARGS" ]    # Script invoked with no command-line args?
+then
+  echo "Usage: `basename $0` <HOSTNAME>"
+  exit $E_OPTERROR         
+fi
+ISHA=$(ssh $1 "if [ ! -f /usr/sbin/crm ] ;then echo no; else echo yes;fi")
+if [ $ISHA = "no" ] ;
+	then
+		echo "This does not appear to be an HA system"
+		exit 0
+	else
+		FC=$(ssh $1 "crm resource failcount OpenSIPS_resource show $1.atldc.vocalocity.com |tail -c 2")
+		if [ $FC -ne 0 ];
+			then 
+				echo "Fail Count for $1 is $FC. Would you like to reset it?"
+				printf "[y/n] Default n : "
+				read ans
+				case $ans in 
+					[Yy] )
+						echo "Resetting fail count on $1 to zero"
+						ssh $1 "crm resource failcount OpenSIPS_resource set $1.atldc.vocalocity.com 0"
+						;;
+					* )
+						echo "Exiting!"
+						exit 0
+						;;
+				esac
+			else
+				echo "Fail count is $FC. Exiting."
+				exit 0
+		fi
+fi

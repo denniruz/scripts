@@ -1,0 +1,6 @@
+#!/bin/bash
+. /home/druzeski/scripts/bsfl
+ls klsdjf > /dev/null 2>&1 
+bail "lstest failed"
+
+

@@ -1,0 +1,52 @@
+#!/bin/bash
+#
+## FILE: check_psmem
+##
+## DESCRIPTION: This is a nagios compatible script to checks memory used by a named process
+##
+## AUTHOR: Dennis Ruzeski (denniruz@gmail.com)
+##
+## Creation Date: 3/21/2013
+##
+## Last Modified: 3/21/2013
+##
+## VERSION: 1.0
+##
+## USAGE: ./check_psmem <process_name> <type>
+## 		The process name argument is required and should be the name without path of the
+##		process to be monitored (ie, pdns_server, httpd, etc..). An optional type of check 
+## 		can be passed as either rss or size, rss being the resident set size without shared 
+##		memory or size for linked library and shared mem info (default)
+##		If the script is called from a terminal, output will be informatinal. If it's called from 
+##		nagios, output will be suitable for notifications and alerts.
+##
+## TODO:
+##
+#
+# Variables-
+PROCESS_NAME=${1}
+CHECK_TYPE=${2}
+# Functions-
+_check_mem_size_cl()
+	{
+	/bin/ps -C ${PROCESS_NAME} -O ${CHECK_TYPE} | \
+	/bin/gawk '{ count ++; sum += $2 }; 
+ 	END {count --; 
+ 	print "Number of processes =",count;  
+ 	print "Memory usage per process =",sum/1024/count, "MB"; 
+ 	print "Total memory usage =", sum/1024, "MB" ;};' 
+	}
+_check_mem_size_nag()
+	{
+	/bin/ps -C ${PROCESS_NAME} -O ${CHECK_TYPE} | \
+        /bin/gawk '{ count ++; sum += $2 };
+        END {count --;
+        print sum/1024 ;};'
+	}
+# See how we were called
+if [[ -t 0 ]]; then
+	_check_mem_size_cl
+else
+	_check_mem_size_nag
+fi
+

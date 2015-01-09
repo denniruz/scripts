@@ -1,0 +1,78 @@
+#!/bin/bash
+ 
+DATA="The test message has been sent"
+ 
+SUBJECT="Mail Relay Test"
+ 
+echo
+echo
+echo
+echo "***************************************"
+echo "*                                                           *"
+echo "*             Mail Relay Test App                    *"
+echo "*                                                           *"
+echo "***************************************"
+echo 
+echo "Press control+c at any time to cancel"
+echo "Please answer all of the following questions:"
+echo
+ 
+LOOP=0
+while [ $LOOP -ne 1  ]
+do
+  echo -n "Enter Mail Server Name: " ; read MAILSERVER;
+  if [ "$MAILSERVER" != '' ] ; then
+    LOOP=1
+  fi
+done
+
+echo -n "Enter Port: [typically 25]: "; read PORT;
+if [ "$PORT" = '' ] ; then
+  LOOP=1
+  PORT="25"
+fi
+
+echo -n "Enter Mail From: [support@email.com]" ; read MAILFROM
+if [ "$MAILFROM" = '' ] ; then
+  MAILFROM="support@email.com"
+  LOOP=0
+fi
+ 
+LOOP=0
+while [ $LOOP -ne 1 ]
+do
+  echo -n "Enter Mail To: " ; read MAILTO
+  if [ "$MAILTO" != '' ] ; then
+    LOOP=1
+  fi
+done
+ 
+echo 
+echo "Connecting to $MAILSERVER on Port $PORT";
+echo "Please wait ... "
+echo
+exec 3<>/dev/tcp/$MAILSERVER/$PORT 
+ 
+if [ $? -ne 0 ] ; then
+  echo
+  echo "ERROR: Cannot connect to the Mail Server";
+  echo "Please check the servername and/or the port number"
+  exit
+fi
+ 
+echo -en "HELO mail.email.com\r\n"  >&3 
+echo -en "MAIL FROM:$MAILFROM\r\n" >&3
+echo -en "RCPT TO:$MAILTO\r\n" >&3
+echo -en "DATA\r\n" >&3
+echo -en "Subject: $SUBJECT\r\n\r\n" >&3
+echo -en "$DATA\r\n" >&3
+echo -en ".\r\n" >&3
+echo -en "QUIT\r\n" >&3
+cat <&3
+exec 3>&- 
+ 
+echo
+echo
+echo "Check the above output for errors"
+echo
+

@@ -1,0 +1,26 @@
+#!/bin/bash
+_finger=`curl http://artscene.textfiles.com/asciiart/afinger.txt`
+_hello=`figlet hello`
+exec 3<>/dev/tcp/10.4.0.31/25
+if [ $? -ne 0 ] ; then
+  echo
+  echo "ERROR: Cannot connect to the Mail Server";
+  echo "Please check the servername and/or the port number"
+  exit
+fi
+echo -en "HELO mail.email.com\r\n"  >&3 
+echo -en "MAIL FROM:Yo_Mama@KissMyAss.com\r\n" >&3
+#echo -en "RCPT TO:dennis.ruzeski@vocalocity.com\r\n" >&3
+echo -en "RCPT TO:7163482610@messaging.sprintpcs.com\r\n" >&3
+#echo -en "RCPT TO:dennis.ruzeski@vocalocity.com\r\n" >&3
+echo -en "DATA\r\n" >&3
+echo -en "Subject: /dev/tcp mailtest\r\n\r\n" >&3
+echo -en "You're number 1!\r\n" >&3
+echo -en "Ever dance with the devil in the pale moonlight?\r\n" >&3
+#echo -en "${_finger} \r\n\r\n" >&3
+echo -en "${_hello} \r\n\r\n" >&3
+echo -en ".\r\n" >&3
+echo -en "QUIT\r\n" >&3
+cat <&3
+exec 3>&- 
+

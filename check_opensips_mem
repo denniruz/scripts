@@ -1,0 +1,33 @@
+#!/bin/bash
+OPENSIPS_CHECKMEM_COMMAND="/usr/local/nagios/libexec/check_opensips_mem_HA -s localhost -p 8080 -sw 60 -sc 90 -pw 60 -pc 90"
+OPENSIPS_RESTART_COMMAND="/usr/sbin/crm resource restart OpenSIPS_resource"
+OPENSIPS_CHECK_FC_COMMAND="/usr/sbin/crm resource failcount OpenSIPS_resource show $1.atldc.vocalocity.com |tail -c 2"
+NO_ARGS=0
+E_OPTERROR=85
+
+if [ $# -eq "$NO_ARGS" ]    # Script invoked with no command-line args?
+then
+    echo "Usage: `basename $0` [checkmem|restart} <HOSTNAME>"
+      exit $E_OPTERROR
+    fi
+    ISHA=$(ssh $2 "if [ ! -f /usr/sbin/crm ] ;then echo no; else echo yes;fi")
+    if [ $ISHA = "no" ] ;
+        then
+              echo "This does not appear to be an HA system"
+                  exit 3
+                    else
+#
+            case $1 in 
+                [Cc][Hh][Ee][Cc][Kk][Mm][Ee][Mm] )
+                ssh -o BatchMode=yes -o ConnectTimeout=2 -q $2 ${OPENSIPS_CHECKMEM_COMMAND} 2>&1 |tail -1
+                ;;
+                [Rr][Ee][Ss][Tt][Aa][Rr][Tt] )
+                ssh -o BatchMode=yes -o ConnectTimeout=2 $2 ${OPENSIPS_RESTART_COMMAND}
+                ;;
+                * )
+                echo "That is not valid input"
+                ;;
+            esac
+    fi
+
+

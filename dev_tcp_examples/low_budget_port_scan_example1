@@ -1,0 +1,6 @@
+for port in {1..65535}; do
+  echo >/dev/tcp/google.com/$port &&
+    echo "port $port is open" ||
+    echo "port $port is closed"
+done
+

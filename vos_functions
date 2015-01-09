@@ -1,0 +1,24 @@
+#!/bin/bash
+# lighter version of 'ver'
+#
+# lighter way to get java app version data
+#
+hdap_ver() {
+    exec 3<>/dev/tcp/${1}/8080
+    echo -e "GET /appserver/version.properties\n\n">&3
+    cat <&3
+    exec 3>&-
+    }
+vos_ver() {
+    exec 3<>/dev/tcp/${1}/8080
+    echo -e "GET /vocalocity-browser/version.properties\n\n">&3
+    cat <&3
+    exec 3>&-
+    }
+get_calls()  {
+    exec 3<>/dev/tcp/${1}/8080
+    echo -e "GET /vocalocity-browser/jsp/sessions.jsp\n\n">&3
+    cat <&3
+    exec 3>&-
+    }
+

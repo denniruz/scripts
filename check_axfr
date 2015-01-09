@@ -1,0 +1,86 @@
+#!/bin/bash 
+# 
+## FILE: check_axfr
+##
+## DESCRIPTION: This is a nagios compatible script to checks DNS slave zone integrity.
+##
+## AUTHOR: Dennis Ruzeski (denniruz@gmail.com)
+##
+## Creation Date: 03/20/2013
+##
+## Last Modified: 05/07/2013
+## 
+## VERSION: 1.2
+##
+## USAGE: ./check_axfr <type>
+##       Argument is optional. If none is passed it will compare SOA records and will not display
+##       records to stdout, only pass/fail. The other option is much more computationally expensive 
+##       and will check all records against the master and display diff output to stdout.
+## 
+## TODO:  
+##       
+#
+# Declare some arrays-
+declare -a INCONSISTENT
+declare -a PDNS_ZONES=('accounts.vocalocity.com' 'media.vocalocity.com' 'accounts.vocalos.com' 'media.vocalos.com')
+# Set some vars.
+CHECK_TYPE="${1}"
+MASTER_DNS="10.4.0.10"
+DIFF_CMD="/usr/bin/diff -iw"
+DIG_CMD="/usr/bin/dig"
+# Function Definitions
+_zone_diff_soa() 
+    {
+        ${DIFF_CMD} \
+            <(${DIG_CMD} +short ${ZONE} SOA @localhost) \
+            <(${DIG_CMD} +short ${ZONE} SOA @"${MASTER_DNS}") \
+            > /dev/null 2>&1
+    }
+
+_zone_diff_all_records()
+    {
+         ${DIFF_CMD} \
+            <(${DIG_CMD} ${ZONE} AXFR @localhost | grep ^sip |sort) \
+            <(${DIG_CMD} ${ZONE} AXFR @"${MASTER_DNS}" | grep ^sip |sort)
+    }
+
+case ${CHECK_TYPE} in 
+    [Ss][Oo][Aa] )
+        for ZONE in ${PDNS_ZONES[@]}; do
+        _zone_diff_soa
+        if [[ $? -eq 1 ]]; then
+           INCONSISTENT=("${INCONSISTENT[@]}" "${ZONE}")
+        fi
+        done
+        if [[ ${#INCONSISTENT[@]} -eq 0 ]]; then
+            echo "OK: All PDNS Zones are consistent with the master"
+            exit 0
+        else
+            echo "CRITICAL: The following zones differ from the master"
+            echo ${INCONSISTENT[@]} |tr " " "\n"
+        exit 2
+        fi
+        ;;
+    [Aa][Xx][Ff][Rr] )
+        for ZONE in ${PDNS_ZONES[@]}; do
+            _zone_diff_all_records 
+        done
+        ;;
+    * )
+        for ZONE in ${PDNS_ZONES[@]}; do
+             _zone_diff_soa
+             if [[ $? -eq 1 ]]; then
+                INCONSISTENT=("${INCONSISTENT[@]}" "${ZONE}")
+             fi
+        done
+        if [[ ${#INCONSISTENT[@]} -eq 0 ]]; then
+           echo "OK: All PDNS Zones are consistent with the master"
+           exit 0
+        else
+           echo "CRITICAL: The following zones differ from the master"
+           echo ${INCONSISTENT[@]} |tr " " "\n"
+           exit 2
+        fi
+        ;;
+esac
+

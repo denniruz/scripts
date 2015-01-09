@@ -1,0 +1,69 @@
+#!/bin/bash
+# Nagios retest of SIP timeout
+# druzeski - 11.28.2012
+#
+NO_ARGS=0 
+E_OPTERROR=85
+SSH_CMD="/usr/bin/ssh -o BatchMode=yes -o ConnectTimeout=2"
+#
+# Set the proper ssh key
+if [[ ${1} =~ ^amz1 ]]; then
+  SSH_KEY="-i /home/druzeski/.ssh/amz1.pem"
+else
+  SSH_KEY=""
+fi
+# Color Defs-
+bldred=${txtbld}$(tput setaf 1) #  red
+bldgrn=${txtbld}$(tput setaf 2) #  green
+bldylw=${txtbld}$(tput setaf 3) #  yellow
+bldblu=${txtbld}$(tput setaf 4) #  blue
+bldprp=${txtbld}$(tput setaf 5) #  purple
+bldlbl=${txtbld}$(tput setaf 6) #  light blue
+bldwht=${txtbld}$(tput setaf 7) #  white
+txtrst=$(tput sgr0)             # Reset
+info=${bldwht}*${txtrst}        # Feedback
+pass=${bldblu}*${txtrst}
+warn=${bldred}*${txtrst}
+ques=${bldblu}?${txtrst}
+LOAD=$(${SSH_CMD} ${SSH_KEY} ${1} uptime |awk '{print $10}' | cut -d. -f1)
+VER_TIME=$(${SSH_CMD} ${SSH_KEY} ${1} /usr/bin/time -f %e ver 2>&1 | awk -F. 'NR==3 {print $1}')
+VER_CHECK=$(${SSH_CMD} ${SSH_KEY} ${1} 'ver |grep -q JBoss; echo $?')
+SIP_CHECK=$(${SSH_CMD} ${SSH_KEY} ${1} '/usr/local/nagios/libexec/check_asterisk --url sip:pi6786807033@${1} -w 500 -c 1000')
+if [ $# -eq "$NO_ARGS" ]    # Script invoked with no command-line args?
+then
+  echo "Usage: `basename $0` <HOSTNAME>"
+  exit $E_OPTERROR         
+fi
+# Check load
+if [[ ${LOAD} -lt 6 ]]
+  then
+    echo "${bldgrn} One minute load is OK- ${LOAD} ${txtrst}"
+    elif [[ ${LOAD} -ge 6 ]] && [[ ${LOAD} -lt 12 ]]
+    then
+    echo "${bldylw} One minute load is WARNING- ${LOAD} ${txtrst}"
+    else
+    echo "${bldred} One minute load is HIGH- ${LOAD} ${txtrst}" 
+fi
+# Check Ver
+if [ ${VER_CHECK} -eq 0 ] 
+then
+  echo "${bldred} JBoss is not running! ${txtrst}"
+else
+  if (( ${VER_TIME}  < 5 ))
+  then 
+  echo "${bldgrn} Ver is returning in ${VER_TIME} seconds ${txtrst}"
+    elif (( 5 <= ${VER_TIME} && ${VER_TIME} <= 10 ))
+  then
+     echo "${bldylw} Ver is returning slowly!- ${txtrst}"
+  else
+  echo "${bldred} Ver is taking more then 10 seconds to respond! ${txtrst}"
+fi
+fi
+# Check nagios SIP test
+echo ${SIP_CHECK} |grep -q OK
+if [ $? -eq 0 ]
+then
+  echo "${bldgrn} Manual recheck of nagios test is OK ${txtrst}"
+else 
+  echo "${bldred} Manual recheck of nagios test has failed! ${txtrst}"
+fi

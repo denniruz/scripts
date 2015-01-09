@@ -1,0 +1,11 @@
+#!/bin/bash
+
+shuffle() { 
+    awk 'BEGIN{srand();} {printf "%06d %s\n", rand()*1000000, $0;}' | sort -n | cut -c8-
+}
+
+for host in `cat /home/druzeski/ALL_EXT_DNS | shuffle`; do dig $host @10.60.6.40 > /dev/null ;done &
+for host in `cat /home/druzeski/ALL_EXT_DNS | shuffle`; do dig $host @10.60.6.40 > /dev/null ;done &
+for host in `cat /home/druzeski/ALL_EXT_DNS | shuffle`; do dig $host @10.60.6.40 > /dev/null ;done &
+for host in `cat /home/druzeski/ALL_EXT_DNS | shuffle`; do dig $host @10.60.6.40 > /dev/null ;done &
+

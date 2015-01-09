@@ -1,0 +1,21 @@
+#!/bin/bash
+# Restart App Timer...
+. /home/druzeski/scripts/vos_functions
+OPTERROR=85
+
+if [[ $# -ne 1 ]];then
+  echo "Usage: $(basename $0) <hostname>"
+  exit ${OPTERROR}
+fi
+
+while true
+ do srv=$(get_calls |grep -c sip)
+ if [ $srv -lt 3 ]
+  then 
+       ssh -i /home/druzeski/.ssh/amz1.pem $1 'service jbossx restart'
+       exit 0
+  else 
+       echo $srv
+       sleep 4
+  fi
+done

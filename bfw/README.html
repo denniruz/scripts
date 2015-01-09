@@ -1,0 +1,151 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+<HEAD>
+	<META HTTP-EQUIV="CONTENT-TYPE" CONTENT="text/html; charset=utf-8">
+	<TITLE></TITLE>
+	<META NAME="GENERATOR" CONTENT="OpenOffice.org 2.4  (Linux)">
+	<META NAME="AUTHOR" CONTENT="tokeefe">
+	<META NAME="CREATED" CONTENT="20080801;8083400">
+	<META NAME="CHANGEDBY" CONTENT="tokeefe">
+	<META NAME="CHANGED" CONTENT="20080804;17463400">
+	<META NAME="CHANGEDBY" CONTENT="Timothy O'Keefe">
+	<META NAME="CHANGEDBY" CONTENT="Timothy O'Keefe">
+	<META NAME="CHANGEDBY" CONTENT="Timothy O'Keefe">
+	<META NAME="CHANGEDBY" CONTENT="tokeefe">
+	<META NAME="CHANGEDBY" CONTENT="Timothy O'Keefe">
+	<META NAME="CHANGEDBY" CONTENT="Timothy O'Keefe">
+	<META NAME="CHANGEDBY" CONTENT="tokeefe">
+	<STYLE TYPE="text/css">
+	<!--
+		@page { size: 8.5in 11in; margin: 0.79in }
+		P { margin-bottom: 0.08in }
+	-->
+	</STYLE>
+</HEAD>
+<BODY LANG="en-US" DIR="LTR">
+<PRE><FONT FACE="DejaVu Sans, sans-serif"><FONT SIZE=4><B>Bash-Framework v0.5</B></FONT></FONT>
+
+<FONT FACE="Arial, sans-serif">Authors:</FONT>
+        <FONT FACE="Arial, sans-serif">tokeefe@fas.harvard.edu</FONT>
+        <FONT FACE="Arial, sans-serif">vpetrov@nmr.mgh.harvard.edu</FONT>
+
+<FONT FACE="Arial, sans-serif">Date:</FONT>
+                <FONT FACE="Arial, sans-serif">2008.08.04</FONT>
+
+
+<FONT FACE="Arial, sans-serif">The Bourne Again Shell (a.k.a. “Bash”) Framework attempts to deliver a more robust, modular, and object-oriented[-ish] approach to shell scripting</FONT>
+<FONT FACE="Arial, sans-serif">.</FONT>
+<FONT FACE="Arial, sans-serif">The motivation behind the project is to promote shell-script reuse by promoting and enforcing generality.</FONT>
+
+<FONT FACE="Arial, sans-serif">There are some peculiarities –  mostly due to the nature of shell scripting – but these are surprisingly few and easy to see past.</FONT>
+
+
+<FONT SIZE=3><U><B>Installation</B></U></FONT>
+
+<FONT FACE="Arial, sans-serif">You can download the framework from:</FONT>
+
+        <A HREF="https://svn.neuroinfo.org/tokeefe/Bash-Framework">https://svn.neuroinfo.org/lib/Bash-Framework</A>
+
+<FONT FACE="Arial, sans-serif">There is no installation process.</FONT>
+
+
+<FONT SIZE=3><U><B>The Library</B></U></FONT>
+
+<FONT FACE="Arial, sans-serif">It was very important to make the framework simple and straight-forward, which in turn led to a framework where individual elements could be used independently of each other. We consider Bash-Framework thus both a framework <I>and</I> a library. To use the library  in your scripts, you must source the include script via adding the following line to the top of any script (below #!/bin/bash):</FONT>
+
+        . /path/to/Bash-Framework/bash/include
+
+<FONT FACE="Arial, sans-serif">At this point, you can begin including and using tools from the library by supplying include statements like so:</FONT>
+
+        include bash.io.File;
+        include bash.apps.Pgsql;
+
+<FONT FACE="Arial, sans-serif">As is reminiscent of other languages – which was the goal – you can think of the dots ('.') as slashes (&quot;/&quot;) starting from the directory containing the library:</FONT>
+        
+        /path/to/<FONT COLOR="#3deb3d">Bash-Framework</FONT>/bash
+
+<FONT SIZE=3><U><B>The Logger</B></U></FONT>
+
+<FONT FACE="Arial, sans-serif">By default, most library classes call upon a bash.utils.Logger, therefore, one is automatically instantiated. Your scripts can also utilize this logging facility. The default logfile is stored in:</FONT>
+        
+        /tmp/log4b.log
+
+<FONT FACE="Arial, sans-serif">To redirect Logger output to a different file, you must call the method:</FONT>
+        
+        Logger.setLogFile “/some/file.log”;
+
+<FONT FACE="Arial, sans-serif">When sending logging commands to the Logger, there at several methods that you should be aware of:</FONT>
+
+        <FONT FACE="Arial, sans-serif">a)      </FONT>Logger.note “text”; #log the text as a note
+        <FONT FACE="Arial, sans-serif">b)      </FONT>Logger.warn “text”;  #log the text as a warning
+        <FONT FACE="Arial, sans-serif">c)      </FONT>Logger.error “text”; #log the text as an error 
+
+<FONT FACE="Arial, sans-serif">The Logger is also responsible for output to stdout.</FONT>
+
+
+<FONT SIZE=3><U><B>The Framework</B></U></FONT>
+
+<FONT FACE="Arial, sans-serif">Until now, you've only included access the library in your scripts. Once you include the framework – described later – you will enable a suite of other unique yet related features. Every parameter that is passed to a script which includes the bash.Framework will follow one of two paths:</FONT>
+
+        % ./MyScript.sh -a -b=c --d
+   
+<FONT FACE="Arial, sans-serif">The interesting piece lies in how these arguments are handled. According to the framework specification, if an argument is:</FONT>
+
+        <FONT FACE="Arial, sans-serif">a.      </FONT>test<FONT FACE="Arial, sans-serif">, -</FONT>test<FONT FACE="Arial, sans-serif">, or --</FONT>test
+                <FONT FACE="Arial, sans-serif">this would execute testAction() function. You are responsible for creating these functions.</FONT>
+
+        <FONT FACE="Arial, sans-serif">b.     </FONT> test=b<FONT FACE="Arial, sans-serif">,</FONT> -test=b<FONT FACE="Arial, sans-serif">, or --</FONT>test=b
+                <FONT FACE="Arial, sans-serif">this would set the inner variable </FONT>$TEST <FONT FACE="Arial, sans-serif">to “</FONT>b” <FONT FACE="Arial, sans-serif"><I>before </I></FONT><FONT FACE="Arial, sans-serif">the script is executed.</FONT>
+
+        <FONT FACE="Arial, sans-serif">c.      the </FONT>-help <FONT FACE="Arial, sans-serif">argument displays usage information gathered by parsing the script. A comment, one line above each action is used to display information about that action.</FONT>
+
+
+<FONT SIZE=3><U><B>Including the Framework</B></U></FONT>
+
+<FONT FACE="Arial, sans-serif">To use the framework, you must include it with:</FONT>
+
+        include bash.Framework;
+
+<FONT FACE="Arial, sans-serif">Once included, you must become acclimated to a few simple convention:</FONT>
+
+<FONT FACE="Arial, sans-serif">1.      Every script must have a main() function, and the last line of a script must end with the text:</FONT>
+ 
+                dispatch;
+
+
+<FONT SIZE=3><U><B>Classes</B></U></FONT>
+
+<FONT FACE="Arial, sans-serif">To use a class, you “include” it. There is only allowed one instance of a class per script.  If you have included the bash.io.Filesystem class for example, you must call it's methods like so:</FONT>
+        
+        include bash.io.Filesystem;
+
+        Filesystem.delete $1;
+
+<FONT FACE="Arial, sans-serif">If you decide that you want to write a new class, you must follow these conventions:</FONT>
+
+<FONT FACE="Arial, sans-serif">1.      You must declare a __construct() function, and call that function at the end of the class file, similar to “Include the Framework: Step 1”:</FONT>
+
+                <FONT FACE="DejaVu Sans, sans-serif">function __construct() </FONT>
+                <FONT FACE="DejaVu Sans, sans-serif">{</FONT>
+                        <FONT FACE="DejaVu Sans, sans-serif">printf “This is a constructor\n”;</FONT>
+                        <FONT FACE="DejaVu Sans, sans-serif">return 0;</FONT>
+                <FONT FACE="DejaVu Sans, sans-serif">}</FONT>
+
+                #this is the last line of the class.
+                __construct;
+
+<FONT FACE="Arial, sans-serif">2.      If you've written a class e.g., Test.inc, it's methods must be declared like so:</FONT>
+
+                function Test.someMethod()
+                {
+                        printf “This is some method of a class\n”;
+                        return 0;
+                }
+        
+<FONT FACE="Arial, sans-serif">3.      Bash functions only return integers, therefore if you want a function to return a string for example, you must pass in a variable by reference i.e., you pass in the variable that you want set:</FONT>
+
+                Test.someMethod RET;
+
+<FONT FACE="Arial, sans-serif">In this case, the variable </FONT>$RET <FONT FACE="Arial, sans-serif">would be set by </FONT>Test.someMethod<FONT FACE="Arial, sans-serif">.</FONT></PRE>
+</BODY>
+</HTML>

@@ -1,0 +1,8 @@
+<?xml-stylesheet type="text/css" href="song.css"?><SONG xmlns="http://metalab.unc.edu/xml/namespace/song"
+xmlns:xlink="http://www.w3.org/1999/xlink">&#10; <TITLE>Hot Cop</TITLE>&#10; <PHOTO ALT="Victor Willis in
+Cop Outfit" HEIGHT="200" WIDTH="100" xlink:href="hotcop.jpg" xlink:show="onLoad"
+xlink:type="simple"></PHOTO>&#10; <COMPOSER>Jacques Morali</COMPOSER>&#10; <COMPOSER>Henri
+Belolo</COMPOSER>&#10; <COMPOSER>Victor Willis</COMPOSER>&#10; <PRODUCER>Jacques
+Morali</PRODUCER>&#10; &#10; <PUBLISHER xlink:href="http://www.amrecords.com/" xlink:type="simple">&#10; A
+&amp; M Records&#10; </PUBLISHER>&#10; <LENGTH>6:20</LENGTH>&#10; <YEAR>1978</YEAR>&#10;
+<ARTIST>Village People</ARTIST>&#10;</SONG>

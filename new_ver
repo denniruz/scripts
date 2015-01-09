@@ -1,0 +1,36 @@
+#!/bin/bash
+# lighter version of 'ver'
+#
+# lighter way to get java app version data
+#
+if  [[ $# -eq 1 ]] 
+   then
+    TARGET_HOST=${1}
+  else
+    TARGET_HOST="localhost"
+fi
+
+    hdap_ver()
+             {
+    nc -z ${TARGET_HOST} 8080
+    if [[ $? -eq 0 ]] 
+    then
+    exec 3<>/dev/tcp/${TARGET_HOST}/8080
+    echo -e "GET /appserver/version.properties\n\n">&3
+    cat <&3
+    exec 3>&-
+    else 
+    echo "Port 8080 is not open. JBoss may not be running on ${TARGET_HOST}"
+    fi
+               }
+    vos_ver()
+            {
+    exec 3<>/dev/tcp/${TARGET_HOST}/8080
+    echo -e "GET /vocalocity-browser/version.properties\n\n">&3
+    cat <&3 
+    exec 3>&-
+             }
+echo "HDAP `hdap_ver |grep release`"
+echo "VocalOS `vos_ver |grep release`"
+
+

@@ -1,0 +1,8 @@
+#!/bin/bash
+sessions=$(wget -qO - http://$1:8080/vocalocity-browser/jsp/sessions.jsp)
+
+
+#ret=$(eval grep start-identifier $(wget -qO - http://10.2.1.231:8080/vocalocity-browser/jsp/sessions.jsp)  $GREPSIP |sed -e 's/.*>"//' -e 's/^<start-identifier>//' -e "s/\&..;/$sep/g" -e 's;</start.*;;' -e 's/\&gt;//' -e 's/\&amp;//' -e 's/"//g' -e 's/^[ \t]*//')
+
+#[ ! "$ret" ] && echo no sessions || echo "$ret" | awk -F'|' '{printf("%-22s %-33s %-1s %s %s\n", $1,$2,$3,$4,$5)}' | pr -tn
+

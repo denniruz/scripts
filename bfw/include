@@ -1,0 +1,74 @@
+#!/bin/bash
+
+ARGV=$@;
+
+function include()
+{
+	setLibDir;
+	__BF_INC="`echo $1 | sed -e 's@\.@/@g' -e 's@^bash/@@'`.inc";
+
+	__BF_CLASSNAME=`basename "$__BF_INC" | cut -d. -f1`;
+	__BF_VAR="__BF_"$__BF_CLASSNAME;
+
+        # The following code will check:
+	#	1. If there is a variable called __BF_<CLASS>=1
+	#		a. then: set the variable __BF_SOURCE=false
+	#		b. else: create it and set __BF_SOURCE=true
+	__BF_CMD='if [ "$'$__BF_VAR'" ]; then __BF_SOURCE=false; else __BF_SOURCE=true; '$__BF_VAR'=1; fi';
+	eval $__BF_CMD
+
+	# --- source the include
+	if [ "$__BF_SOURCE" = true ]; then
+		source "$__BF_LIB/$__BF_INC";
+	fi
+}
+
+function dispatch()
+{
+
+	#onStart event
+	if [ "`declare -f | egrep '^bash.onStart \(\)' | wc -l`" -gt 0 ]; then
+		__BF_HAS_MAIN=1
+		bash.onStart $ARGV $__BF_LIB;
+	fi
+
+	#Main procedure
+	__BF_HAS_DISPATCH=1
+	if [ "`declare -f | egrep '^main \(\)' | wc -l`" -gt 0 ]; then
+		__BF_HAS_MAIN=1
+		main $ARGV $__BF_LIB;
+	fi
+
+	#onRoutingStart event
+	if [ "`declare -f | egrep '^bash.onRouteStart \(\)' | wc -l`" -gt 0 ]; then
+		__BF_HAS_MAIN=1
+		bash.onRouteStart $ARGV $__BF_LIB;
+	fi
+
+	#Start parsing all the arguments and execute actions
+	routeArguments $ARGV;
+
+	#onRoutingEnd event
+	if [ "`declare -f | egrep '^bash.onRouteEnd \(\)' | wc -l`" -gt 0 ]; then
+		__BF_HAS_MAIN=1
+		bash.onRouteEnd $ARGV $__BF_LIB;
+	fi
+
+	#onClean event
+	if [ "`declare -f | egrep '^bash.onClean \(\)' | wc -l`" -gt 0 ]; then
+		bash.onClean $ARGV $__BF_LIB;
+	fi
+}
+
+function setLibDir()
+{
+	__BF_LIB=`caller 0 | cut -d ' ' -f 3 | sed -e s@/include@@`;
+}
+
+function getLibDir()
+{
+	eval "$1='$__BF_LIB'"
+}
+# --- auto inclusion
+include bash.utils.Logger;
+include bash.helpers.Helper;

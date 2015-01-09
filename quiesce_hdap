@@ -1,0 +1,50 @@
+#!/bin/bash
+# 
+# Script to quiesce an hdap server-
+# Restart jbossx to reenable.
+# druzeski - 2.1.2013
+#
+NO_ARGS=0 
+E_OPTERROR=85
+HOST=${2}
+ACTION=${1}
+SSH_CMD="/usr/bin/ssh -o BatchMode=yes -o ConnectTimeout=2"
+CURL_CMD="/usr/bin/curl"
+ENABLE_OPTS="enableQuiesce=true&inviteCode=503&inviteText=Decline&optionsCode=503&optionsText=Decline"
+DISABLE_OPTS="enableQuiesce=false&inviteCode=-1&inviteText=Decline&optionsCode=-1&optionsText=Decline"
+#
+if [ $# -eq "$NO_ARGS" ]    # Script invoked with no command-line args?
+then
+  echo "Usage: `basename $0` [enable|disable|check] <HOSTNAME>"
+  echo "Enable will quiesce a host, disable will make it active"
+  echo "but may be unreliable. Please restart jbossx to un-quiesce"
+  exit $E_OPTERROR         
+fi
+_q_enable() {
+  ${CURL_CMD} -d "${ENABLE_OPTS}" http://${HOST}:8080/vocalocity-browser/quiesce
+                   }
+_q_disable() {
+  ${CURL_CMD} -d "${DISABLE_OPTS}" http://${HOST}:8080/vocalocity-browser/quiesce
+                   }
+_q_check() {
+  ${CURL_CMD} -s http://${HOST}:8080/vocalocity-browser/quiesce |grep -q DISABLED
+  if [ $? -eq "0" ]
+    then
+      echo "${HOST} quiesce is DISABLED- ${HOST} is taking calls" 
+    else 
+      echo "${HOST} quiesce is ENABLED- ${HOST} is not taking new calls"
+  fi
+                    }
+
+case ${ACTION} in 
+  [Ee][Nn][Aa][Bb][Ll][Ee] )
+       _q_enable ;;
+  [Dd][Ii][Ss][Aa][Bb][Ll][Ee] )
+       _q_disable ;;
+  [Cc][Hh][Ee][Cc][Kk] )
+      _q_check ;;     
+        * )
+       echo "Please check your CL arguments!" ;;
+esac
+
+

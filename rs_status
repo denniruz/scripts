@@ -1,0 +1,4 @@
+#!/bin/bash
+
+
+mongo atlsvpmgss0i2.atldc.vocalocity.com:27018 --eval "printjson(rs.status())" 
