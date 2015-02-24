@@ -1,20 +1,5 @@
 #!/bin/bash
 set -e
-# Use this script to copy shared (libs) files to nginx chrooted
-# jail server. This is tested on 64 bit Linux (Redhat and Friends only)
-# ----------------------------------------------------------------------------
-# Written by Vivek Gite <http://www.cyberciti.biz/>
-# (c) 2006 nixCraft under GNU GPL v2.0+
-# Last updated on: Apr/06/2010 by Vivek Gite
-# ----------------------------------------------------------------------------
-# + Added ld-linux support
-# + Added error checking support
-# + Added nginx suupport
-# + Added for loop so that we can process all files on cmd
-# ----------------------------------------------------------------------------
-# See url for usage:
-# http://www.cyberciti.biz/faq/howto-run-nginx-in-a-chroot-jail/
-# ----------------------------------------------------------------------------
 # Set CHROOT directory name
 BASE="/nginx"
 file="$@"
