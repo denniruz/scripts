@@ -1,4 +1,4 @@
-#!/bib/bash 
+#!/bin/bash 
 # Backup github repos in an organization
 #
 _CURL_CMD="/usr/bin/curl"
