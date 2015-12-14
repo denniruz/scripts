@@ -9,9 +9,17 @@ _ORGANIZATION="ArnoldMediaConsulting"
 echo -n " Username: "
 read _USERNAME
 echo -n " Password: "
-read _PASSWORD
+read -s _PASSWORD
+# Original one-liner
+# curl -u USERNAME:PASSWORD -s https://api.github.com/orgs/ArnoldMediaConsulting/repos?per_page=200 | ruby -rubygems -e 'require "json"; JSON.load(STDIN.read).each { |repo| %x[git clone #{repo["ssh_url"]} ]}'
 # 
-${_CURL_CMD} -u ${_USERNAME}:${_PASSWORD} -s https://api.github.com/orgs/${_ORGANIZATION}/repos?per_page=200 | ${_RUBY_CMD} -rubygems -e 'require json; JSON.load(STDIN.read). each { |repo| %x[git clone #{repo[ssh_url]} ]}' 2>&1 
+${_CURL_CMD} \
+    -u ${_USERNAME}:${_PASSWORD} \
+    -s https://api.github.com/orgs/${_ORGANIZATION}/repos?per_page=200 |\
+    ${_RUBY_CMD} \
+    -rubygems \
+    -e 'require json; JSON.load(STDIN.read).each { |repo| %x[git clone #{repo[ssh_url]} ]}' \
+2>&1 
 
 
 
