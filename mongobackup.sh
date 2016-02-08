@@ -1,4 +1,4 @@
-#!/bin/bash 
+#!/bin/bash -x
 #
 ## FILE: mongobackup.sh
 ##
@@ -25,6 +25,7 @@ _mongo_backup_cmd="/usr/bin/mongodump"
 _mongo_restore_cmd="/usr/bin/mongorestore"
 _backup_name="${_nodetype}-${_hostname}-${_db_name}"
 _s3_logfile="/var/lib/mongo/s3_list"
+declare -a _db_list=( $(awk -F\" '!/local/ {print $2}' <(mongo localhost:27018 --eval "printjson(db.getMongo().getDBNames())")) )
 # Set some functions
 usage() {
     cat <<EOF
@@ -66,30 +67,31 @@ restore() {
 }
 
 backup() {
-    if [[ ${_nodetype} =~ "^ar" ]] || [[ ${_nodetype} =~ "^tm" ]]
+    if [[ ${_nodetype} =~ ^ar ]] || [[ ${_nodetype} =~ ^tm ]]
     then
         _mongoopts=" --ssl"
     else
         _mongoopts=""
     fi
-    if [[ -z ${_single_db_backup} ]]
+    if [[ ${_single_db_backup} == "" ]]
     then
-        _db_opts=" -d ${_single_db_backup}"
-    else
         _db_opts=""
+    else
+        _db_opts=" -d ${_single_db_backup}"
     fi
-    ${_mongo_backup_cmd} -h localhost:27018 ${_mongoopts} ${_db_opts} -o ${_backup_dir} >> ${_logfile}
+    ${_mongo_backup_cmd} -h localhost:27018 ${_mongoopts} ${_db_opts} -o ${_backup_dir} >> ${_logfile} 2>&1
 }
 
 archive() {
-    for _db_name in $(find /mnt/backups/mongodb -type d |awk -F\/ '{print $5}')
+    for _db_name in ${_db_list[@]}
     do 
-        tar jcf ${_backup_dir}/${_backup_name}.tar.bz2 ${_backup_dir}/${_db_name} >> ${_logfile}
-        if [[ -z ${_upload2aws} ]]
+        echo ${_db_name}
+	tar jcf ${_backup_dir}/${_nodetype}-${_hostname}-${_db_name}.tar.bz2 ${_backup_dir}/${_db_name} >> ${_logfile} 2>&1
+        if [[ ${_upload2aws} == "1" ]]
         then
-            /opt/cronos/bin/s3Put.py -e -f ${_backup_dir}/${_backup_name}.tar.bz2 -o ${_s3path}/${_backup_name}.tar.bz2 >> ${_logfile}
+            /opt/cronos/bin/s3Put.py -e -f ${_backup_dir}/${_nodetype}-${_hostname}-${_db_name}.tar.bz2 -o ${_s3path}/${_nodetype}-${_hostname}-${_db_name}.tar.bz2 >> ${_logfile} 2>&1
             # Log backups to a local file for easy restore
-            echo ${_s3path}/${_backup_name}.tar.bz2 >> ${_s3_logfile}
+            echo ${_s3path}/${_nodetype}-${_hostname}-${_db_name}.tar.bz2 >> ${_s3_logfile}
         fi
     done
 }
@@ -106,7 +108,7 @@ do
         d)  _single_db_backup="${OPTARG}"
             echo "Backing up ${_single_db_backup}" >&2
             ;;
-        u)  _upload2aws = "1"
+        u)  _upload2aws="1"
             ;;
         h)  usage
             ;;
@@ -116,16 +118,14 @@ do
     esac
 done
 
-shift $(($OPTIND =1))
 
 # The meat and potatoes
-if [[ -z ${_backup} ]]
+if [[ ${_backup} == "1" ]] || [[ ${_single_db_backup} != "" ]]  
 then
     backup
-elif [[ -z ${_backup} ]] && [[ -z ${_upload2aws} ]]
+elif [[ ${_upload2aws} == "1" ]]
 then
-    backup
+  #  backup
     archive
 fi
-
 
