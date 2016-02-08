@@ -19,7 +19,12 @@
 _hostname="$(/bin/hostname)"
 _nodetype="$(/opt/cronos/bin/user-data.py -k nodetype)"
 _backup_dir="/mnt/backups/mongodb"
-_s3path="/backups/mongodb/nonprod/$(/bin/date +%Y)/$(/bin/date +%m)/$(/bin/date +%d)/$(/bin/date +%H)"
+if [[ ${_nodetype} =~ "*-prod*" ]]
+then
+    _s3path="/backups/mongodb/prod/$(/bin/date +%Y)/$(/bin/date +%m)/$(/bin/date +%d)/$(/bin/date +%H)"
+else
+    _s3path="/backups/mongodb/nonprod/$(/bin/date +%Y)/$(/bin/date +%m)/$(/bin/date +%d)/$(/bin/date +%H)"
+fi
 _logfile="/var/log/mongo/mongobackup.log"
 _mongo_backup_cmd="/usr/bin/mongodump"
 _mongo_restore_cmd="/usr/bin/mongorestore"
@@ -58,7 +63,8 @@ EOF
 
 if [[ $# -eq 0 ]]
 then
-    usage
+    backup
+    archive
     exit 0
 fi
 
