@@ -19,8 +19,8 @@
 ## Begin script
 # Set some variables-
 JIRA="vocalocity.atlassian.net"
-JIRA_USER="druzeski"
-JIRA_PASS="tinfish83"
+JIRA_USER=""
+JIRA_PASS=""
 release="${1}
 
 /opt/atlassian-cli/jira.sh \

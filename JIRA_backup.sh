@@ -1,7 +1,7 @@
 #!/bin/bash
-USERNAME="amc_admin"  
-PASSWORD=";lkajsdf09aje 894e2"
-INSTANCE="arnoldmedia.jira.com"
+USERNAME=""  
+PASSWORD=""
+INSTANCE=""
 LOCATION=
  
 TODAY=`date +%Y%m%d`
