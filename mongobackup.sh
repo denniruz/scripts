@@ -1,4 +1,4 @@
-#!/bin/bash -x
+#!/bin/bash 
 #
 ## FILE: mongobackup.sh
 ##
@@ -8,14 +8,13 @@
 ##
 ## Creation Date: 2.5.2016
 ##
-## Last Modified: 2.5.2016
+## Last Modified: 2.8.2016
 ##
-## VERSION: 1.0
+## VERSION: 1.2
 ##
 ## Begin script
 ##
 # Define some variables
-
 _hostname="$(/bin/hostname)"
 _nodetype="$(/opt/cronos/bin/user-data.py -k nodetype)"
 _backup_dir="/mnt/backups/mongodb"
@@ -131,7 +130,7 @@ then
     backup
 elif [[ ${_upload2aws} == "1" ]]
 then
-  #  backup
+    backup
     archive
 fi
 
