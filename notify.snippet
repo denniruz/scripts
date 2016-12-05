@@ -1,0 +1,2 @@
+if [[ $? == 0 ]]; then echo "DB Archive operation on $HOSTNAME has finished"|mailx -s "Operation Successful" 6782165176@txt.att.net; else echo "DB Archive operation on $HOSTNAME has failed" |mailx -s "Operation Failed" 6782165176@txt.att.net; fi
+
