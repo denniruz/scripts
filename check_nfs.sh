@@ -17,7 +17,7 @@
 ##        This version takes no arguments
 ##
 ## TODO: Improve the check for stale mounts, add command line arguments to provide the ability to 
-## 			 check mount statut, stale mounts, and latency separately.
+## 			 check mount status, stale mounts, and latency separately.
 #
 declare -a nfs_mounts=( $(grep -v ^\# /etc/fstab |grep nfs |awk '{print $2}') )
 declare -a MNT_STATUS
