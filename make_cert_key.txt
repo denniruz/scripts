@@ -1,0 +1,2 @@
+openssl req -new -newkey rsa:2048 -nodes -out star_financialwellbeing_healthways_com.csr -keyout star_financialwellbeing_healthways_com.key -subj "/C=US/ST=Tennessee/L=Franklin/O=Healthways Inc./OU=Financial Wellbeing/CN=*.financialwellbeing.healthways.com"
+
